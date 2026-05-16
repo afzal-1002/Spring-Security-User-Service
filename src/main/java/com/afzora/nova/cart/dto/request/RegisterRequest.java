@@ -1,15 +1,14 @@
 package com.afzora.nova.cart.dto.request;
 
-import lombok.Builder;
-import lombok.Data;
+import java.util.Set;
 
-@Data
-@Builder
-public class RegisterRequest {
-    private String firstName;
-    private String lastName;
-    private String userName;
-    private String email;
-    private String phoneNumber;
-    private String password;
-}
+
+public record RegisterRequest (
+     String firstName,
+     String lastName,
+     String userName,
+     String email,
+     String phoneNumber,
+     String password,
+     Set<String> roles
+){}

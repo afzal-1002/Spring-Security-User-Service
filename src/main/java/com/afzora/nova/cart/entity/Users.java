@@ -1,11 +1,10 @@
 package com.afzora.nova.cart.entity;
 
-import com.afzora.nova.cart.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -39,11 +38,12 @@ public class Users {
     @Column(nullable = false)
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role")
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable( name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
-    private Set<Role> roles;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable( name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
 
     private Boolean enabled;
 
