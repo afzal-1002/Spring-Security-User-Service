@@ -11,10 +11,10 @@ public interface JwtService {
       String generateAccessToken( UserDetails userDetails);
       String generateRefreshToken( UserDetails userDetails);
       String extractUsername(String token);
+      Claims extractAllClaims(String token);
       boolean isTokenValid( String token, UserDetails userDetails);
       boolean isRefreshTokenValid(String token, UserDetails userDetails);
       boolean isTokenExpired(String token);
-      Claims extractAllClaims(String token);
       SecretKey getSignInKey();
       String refreshAccessToken(String refreshToken);
 }

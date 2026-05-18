@@ -6,6 +6,7 @@ import com.afzora.nova.cart.dto.response.UserProfileResponse;
 import com.afzora.nova.cart.dto.response.UserResponse;
 import com.afzora.nova.cart.entity.Role;
 import com.afzora.nova.cart.entity.Users;
+import com.afzora.nova.cart.exception.UserAlreadyExistsException;
 import com.afzora.nova.cart.mapper.UsersMapper;
 import com.afzora.nova.cart.repository.UsersRepository;
 import com.afzora.nova.cart.service.RoleService;
@@ -78,10 +79,10 @@ public class UsersServiceImplementation implements UsersService {
     public UserResponse createCustomer(CreateUserRequest request) {
 
         if (existsByEmail(request.email())) {throw
-                new RuntimeException("Email already exists");}
+                new UserAlreadyExistsException("Email already exists");}
 
         if (existsByUserName(request.userName())) {throw
-                new RuntimeException("Username already exists");}
+                new UserAlreadyExistsException("Username already exists");}
 
         Set<String> roleNames = request.roles();
 

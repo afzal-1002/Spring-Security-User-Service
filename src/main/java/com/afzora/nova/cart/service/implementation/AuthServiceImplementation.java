@@ -1,5 +1,6 @@
 package com.afzora.nova.cart.service.implementation;
 
+import com.afzora.nova.cart.config.JwtConfig;
 import com.afzora.nova.cart.dto.request.LoginRequest;
 import com.afzora.nova.cart.dto.request.RefreshTokenRequest;
 import com.afzora.nova.cart.dto.request.RegisterRequest;
@@ -12,9 +13,9 @@ import com.afzora.nova.cart.security.CustomUserDetails;
 import com.afzora.nova.cart.service.AuthService;
 import com.afzora.nova.cart.service.JwtService;
 import com.afzora.nova.cart.service.RoleService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,12 +25,7 @@ import java.util.Set;
 @Service
 public class AuthServiceImplementation implements AuthService {
 
-    @Value("${jwt.refresh-expiration}")
-    private Long REFRESH_EXPIRATION;
-
-    @Value("${jwt.access-expiration}")
-    private Long ACCESS_EXPIRATION;
-
+    private final JwtConfig jwtConfig;
     private final UsersRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
@@ -37,10 +33,12 @@ public class AuthServiceImplementation implements AuthService {
     private final RoleService roleService;
     private final AuthMapper authMapper;
 
-    public AuthServiceImplementation(UsersRepository userRepository, PasswordEncoder passwordEncoder,
+    public AuthServiceImplementation(JwtConfig jwtConfig, UsersRepository userRepository,
+                                     PasswordEncoder passwordEncoder,
                                      AuthenticationManager authenticationManager,
                                      JwtService jwtService, RoleService roleService,
                                      AuthMapper authMapper) {
+        this.jwtConfig = jwtConfig;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
@@ -71,14 +69,14 @@ public class AuthServiceImplementation implements AuthService {
         String accessToken = jwtService.generateAccessToken(new CustomUserDetails(user));
         String refreshToken = jwtService.generateRefreshToken(new CustomUserDetails(user));
 
-        return authMapper.buildAuthResponse(user, accessToken, refreshToken, ACCESS_EXPIRATION);
+        return authMapper.buildAuthResponse(user, accessToken, refreshToken, jwtConfig.getACCESS_EXPIRATION());
     }
 
     @Override
     public AuthResponse login(LoginRequest request) {
 
-        authenticationManager.authenticate( new UsernamePasswordAuthenticationToken(
-                        request.userName(),  request.password() ));
+      Authentication authentication =  authenticationManager.authenticate( new
+                UsernamePasswordAuthenticationToken(request.userName(),  request.password() ));
 
         Users user = userRepository.findByUserName(request.userName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -86,7 +84,7 @@ public class AuthServiceImplementation implements AuthService {
         String accessToken = jwtService.generateAccessToken(new CustomUserDetails(user));
         String refreshToken = jwtService.generateRefreshToken(new CustomUserDetails(user));
 
-        return authMapper.buildAuthResponse(user, accessToken, refreshToken, ACCESS_EXPIRATION);
+        return authMapper.buildAuthResponse(user, accessToken, refreshToken, jwtConfig.getACCESS_EXPIRATION());
     }
 
     @Override
@@ -105,7 +103,7 @@ public class AuthServiceImplementation implements AuthService {
 
         String accessToken = jwtService.refreshAccessToken(refreshToken);
 
-        return authMapper.buildAuthResponse(user, accessToken, refreshToken, REFRESH_EXPIRATION);
+        return authMapper.buildAuthResponse(user, accessToken, refreshToken, jwtConfig.getACCESS_EXPIRATION());
     }
 
 }
